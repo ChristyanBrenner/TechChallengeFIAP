@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Repositories;
 using Services;
+using System.Security.Cryptography;
 using Utils;
 using Xunit;
 
@@ -23,9 +24,14 @@ namespace Tests
 
                 await using var ctx = new AppDbContext(options);
 
+                var keyBytes = new byte[32];
+                using var rng = RandomNumberGenerator.Create();
+                rng.GetBytes(keyBytes);
+                var secret = Convert.ToBase64String(keyBytes);
+
                 var jwtSettings = new JwtSettings
                 {
-                    Key = "minha-chave-de-teste-1234567890",
+                    Key = secret,
                     Issuer = "teste-issuer",
                     Audience = "teste-audience",
                     ExpireMinutes = 60
