@@ -1,0 +1,26 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver_container
+    environment:
+      SA_PASSWORD: "TechChallenge5090@"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserverdata:/var/opt/mssql
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cloudgames_api_container
+    ports:
+      - "5000:80"
+    depends_on:
+      - sqlserver
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=CloudGamesApi;User Id=sa;Password=TechChallenge5090@;TrustServerCertificate=True;
+
+volumes:
+  sqlserverdata:

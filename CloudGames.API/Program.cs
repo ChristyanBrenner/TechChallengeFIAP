@@ -62,6 +62,14 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
+// Aplica migrations automaticamente ao iniciar
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
+
+
 // Middleware pipeline
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseSwagger();
