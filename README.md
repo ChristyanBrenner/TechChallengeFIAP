@@ -5,7 +5,7 @@ Projeto desenvolvido como parte do desáfio técnico da pós-graduação da FIAP
 Este repositório contém uma aplicação backend desenvolvida em C#, como foco em boas práticas de arquitetura de software
 
 ## Tecnologias Utilizadas
-- C# /.NET 8
+- C# / .NET 8
 - ASP.NET Core
 - Docker e Docker Compose
 - Testes com xUnit
