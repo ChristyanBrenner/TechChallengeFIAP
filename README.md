@@ -15,7 +15,7 @@ Este repositório contém uma aplicação backend desenvolvida em C#, como foco 
 - Controllers/ -> Endpoints da API
 - Domain/ -> Entidades e regras de negócio
 - Middleware/ -> Tratamento de erros, logging
-- Repositores/ -> Acesso a dados
+- Repositores/ -> Implementação e persistência de dados
 - Services/ -> Lógica de negócio
 - Tests/ -> Testes automatizados
 - Utils/ -> Funções utilitárias
