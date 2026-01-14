@@ -1,10 +1,11 @@
 ﻿using Domain.DTOs;
+using Domain.Entities;
 
 namespace Services
 {
     public interface IAuthService
     {
-        Task<string> RegisterAsync(RegistroUsuarioDto dto);
+        Task<Usuario> RegisterAsync(RegistroUsuarioDto dto);
         Task<string> LoginAsync(LoginDto dto);
     }    
 }

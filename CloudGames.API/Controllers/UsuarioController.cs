@@ -12,7 +12,7 @@ namespace Controllers
         private readonly IUsuarioService _UsuarioService;
         public UsuarioController(IUsuarioService UsuarioService) 
         { 
-            _UsuarioService = UsuarioService; 
+            _UsuarioService = UsuarioService;
         }
 
         [Authorize(Policy = "AdminPolicy")]
@@ -22,6 +22,16 @@ namespace Controllers
             await _UsuarioService.GetAllAsync();
 
             return Ok();
+        }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var usuario = await _UsuarioService.GetByIdAsync(id);
+
+            if (usuario == null)
+                return NotFound("usuario não encontrado!");
+
+            return Ok(usuario);
         }
 
         [Authorize(Policy = "UserPolicy")]

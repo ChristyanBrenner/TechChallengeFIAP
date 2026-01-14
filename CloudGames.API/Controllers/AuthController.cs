@@ -11,7 +11,7 @@ namespace Controllers
         private readonly IAuthService _auth;
         public AuthController(IAuthService auth) 
         { 
-            _auth = auth; 
+            _auth = auth;
         }
 
         [HttpPost("register")]
@@ -19,13 +19,13 @@ namespace Controllers
         {
             try
             {
-                var token = await _auth.RegisterAsync(dto);
-                return Created("", new { token });
+                await _auth.RegisterAsync(dto);
+                return Created("", new { message = "Usuário criado com sucesso!" });
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
-            }            
+            }
         }
 
         [HttpPost("login")]

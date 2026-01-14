@@ -1,5 +1,7 @@
-﻿using Domain.DTOs;
+﻿using CloudGames.Contracts.Events;
+using Domain.DTOs;
 using Domain.Entities;
+using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -16,15 +18,17 @@ namespace Services
         private readonly AppDbContext _ctx;
         private readonly JwtSettings _jwt;
         private readonly PasswordHasher<Usuario> _hasher;
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        public AuthService(AppDbContext ctx, IOptions<JwtSettings> jwtOptions)
+        public AuthService(AppDbContext ctx, IOptions<JwtSettings> jwtOptions, IPublishEndpoint publishEndpoint)
         {
             _ctx = ctx;
             _jwt = jwtOptions.Value;
             _hasher = new PasswordHasher<Usuario>();
+            _publishEndpoint = publishEndpoint;
         }
 
-        public async Task<string> RegisterAsync(RegistroUsuarioDto dto)
+        public async Task<Usuario> RegisterAsync(RegistroUsuarioDto dto)
         {
             // validação de e-mail simples + senha forte (pode expandir)
             if (_ctx.Usuario.Any(u => u.Email == dto.Email))
@@ -33,7 +37,7 @@ namespace Services
             if (!IsSenhaStrong(dto.Senha))
                 throw new ApplicationException("Senha não atende requisitos de segurança.");
 
-            var Usuario = new Usuario
+            var usuario = new Usuario
             {
                 Nome = dto.Nome,
                 Email = dto.Email,
@@ -41,11 +45,17 @@ namespace Services
                 DataCriacao = DateTime.Now
             };
 
-            Usuario.SenhaHash = _hasher.HashPassword(Usuario, dto.Senha);
-            _ctx.Usuario.Add(Usuario);
+            usuario.SenhaHash = _hasher.HashPassword(usuario, dto.Senha);
+            _ctx.Usuario.Add(usuario);
             await _ctx.SaveChangesAsync();
 
-            return GenerateToken(Usuario);
+            await _publishEndpoint.Publish(new UserCreatedEvent(
+            usuario.Id,
+            usuario.Email,
+            DateTime.UtcNow
+        ));
+
+            return usuario;
         }
 
         public async Task<string> LoginAsync(LoginDto dto)
@@ -80,10 +90,10 @@ namespace Services
 
             var claims = new[]
             {
-            new Claim(JwtRegisteredClaimNames.Sub, Usuario.Id.ToString()),
+            new Claim(ClaimTypes.NameIdentifier, Usuario.Id.ToString()),
             new Claim(ClaimTypes.Email, Usuario.Email),
             new Claim(ClaimTypes.Name, Usuario.Nome),
-            //new Claim(ClaimTypes.Role, Usuario.Role)
+            new Claim(ClaimTypes.Role, Usuario.Role)
         };
 
             var token = new JwtSecurityToken(
