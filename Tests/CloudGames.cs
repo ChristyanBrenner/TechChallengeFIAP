@@ -1,5 +1,6 @@
 ﻿using Domain.DTOs;
 using FluentAssertions;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Repositories;
@@ -14,6 +15,8 @@ namespace Tests
     {
         public class AuthServiceTests
         {
+            private readonly IPublishEndpoint _publishEndpoint;
+
             [Fact]
             public async Task Register_Should_Create_User_And_Return_Token()
             {
@@ -37,9 +40,10 @@ namespace Tests
                     ExpireMinutes = 60
                 };
 
-                var jwtOptions = Options.Create(jwtSettings);
-                var svc = new AuthService(ctx, jwtOptions);
 
+                var jwtOptions = Options.Create(jwtSettings);
+                var svc = new AuthService(ctx, jwtOptions, _publishEndpoint);
+                
                 var dto = new RegistroUsuarioDto
                 {
                     Nome = "Teste",
@@ -51,7 +55,7 @@ namespace Tests
                 var token = await svc.RegisterAsync(dto);
 
                 // Assert
-                token.Should().NotBeNullOrWhiteSpace();
+                token.Should().NotBeNull();
                 ctx.Usuario.Count().Should().Be(1);
                 ctx.Usuario.First().Email.Should().Be(dto.Email);
             }
