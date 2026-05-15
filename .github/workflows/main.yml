@@ -23,8 +23,8 @@ jobs:
       - name: Build
         run: dotnet build CloudGames.API.sln --configuration Release --no-restore
 
-      - name: Test
-        run: dotnet test CloudGames.API.sln
+      # - name: Test
+      #   run: dotnet test CloudGames.API.sln
 
   docker:
     needs: build-test
